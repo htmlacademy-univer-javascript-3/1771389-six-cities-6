@@ -1,14 +1,17 @@
-import { CardOffer, Offer} from '../../models/offers';
-import { GetPersentsFromRating} from '../../components/rating/rating';
-import { ReviewForm } from './review-form';
-import { ReviewsList } from '../../components/review/review-list';
-import OffersMap from '../../components/offers-map/offers-map';
-import { MarkedPlaceLocation } from '../../models/place-location';
+import { CardOffer, Offer} from '../../types/offers';
+import { GetPersentsFromRating} from '../rating/rating';
+import { ReviewsList } from '../review/review-list';
+import OffersMap from '../offers-map/offers-map';
+import { MarkedPlaceLocation } from '../../types/place-location';
 import { getCurCity } from '../../store/offers-process/selectors';
-import { Reviews } from '../../models/review';
+import { Reviews } from '../../types/review';
 import { getAuthStatus } from '../../store/user-process/selectors';
-import { AuthorizationStatus } from '../../const';
-import { useAppSelector } from '../../hooks';
+import { AuthorizationStatus, BookmarkPrefix, NUMBER_OF_IMAGES } from '../../const';
+import { useAppDispatch, useAppSelector } from '../../hooks';
+import { Bookmark } from '../bookmark/bookmark';
+import { switchFavoriteStatusInMainOffer } from '../../store/offer-process/offer-process';
+import { switchFavoriteStatusInOffers } from '../../store/offers-process/offers-process';
+import { ReviewForm } from '../review/review-form';
 
 type MainOfferProps = {
   mainOffer: Offer;
@@ -18,8 +21,15 @@ type MainOfferProps = {
 
 
 export function MainOffer({mainOffer, offersNearBy, comments}: MainOfferProps) : JSX.Element{
+  const dispatch = useAppDispatch();
   const currentCity = useAppSelector(getCurCity);
   const authStatus = useAppSelector(getAuthStatus);
+
+  const handleMainOfferBookmarkClick = () =>{
+    dispatch(switchFavoriteStatusInMainOffer());
+    dispatch(switchFavoriteStatusInOffers(mainOffer.id));
+  };
+
   const points = offersNearBy.map(
     (offer) => {
       const loc : MarkedPlaceLocation =
@@ -37,12 +47,13 @@ export function MainOffer({mainOffer, offersNearBy, comments}: MainOfferProps) :
     longitude : mainOffer.location.longitude,
     zoom : mainOffer.location.zoom
   });
+  const tmpImages = mainOffer.images.slice(0, NUMBER_OF_IMAGES);
   return(
     <section className="offer">
       <div className="offer__gallery-container container">
         <div className="offer__gallery">
-          {mainOffer.images.map((imageSrc) => (
-            <div className="offer__image-wrapper" key="offer-image">
+          {tmpImages.map((imageSrc, index) => (
+            <div className="offer__image-wrapper" key={`offer-image-${mainOffer.id + index.toString()}`}>
               <img className="offer__image" src={imageSrc} alt="Photo studio" />
             </div>
           )
@@ -62,12 +73,10 @@ export function MainOffer({mainOffer, offersNearBy, comments}: MainOfferProps) :
             <h1 className="offer__name">
               {mainOffer.title}
             </h1>
-            <button className="offer__bookmark-button button" type="button">
-              <svg className="offer__bookmark-icon" width="31" height="33">
-                <use xlinkHref="#icon-bookmark"></use>
-              </svg>
-              <span className="visually-hidden">To bookmarks</span>
-            </button>
+            <Bookmark offerId={mainOffer.id} isActive={mainOffer.isFavorite}
+              width={31} height={33} bookmarkType={BookmarkPrefix.Offer}
+              onBookmarkClick={handleMainOfferBookmarkClick}
+            />
           </div>
           <div className="offer__rating rating">
             <div className="offer__stars rating__stars">
@@ -98,9 +107,9 @@ export function MainOffer({mainOffer, offersNearBy, comments}: MainOfferProps) :
             <h2 className="offer__inside-title">What&apos;s inside</h2>
             <ul className="offer__inside-list">
               {
-                mainOffer.goods.map((good) =>
+                mainOffer.goods.map((good, index) =>
                   (
-                    <li className="offer__inside-item" key="good">
+                    <li className="offer__inside-item" key={`good-${mainOffer.id + index.toString()}`}>
                       {good}
                     </li>
                   ))

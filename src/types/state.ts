@@ -7,16 +7,26 @@ import { Reviews } from './review.js';
 export type OffersState = {
   city: City;
   cities: Cities;
-  places: CardOffer[];
+  offers: CardOffer[];
   isLoadingOffers: boolean;
+}
+
+export type FavoritesState = {
+  favoriteOffers: CardOffer[];
+  isLoadingFavoritesOffers: boolean;
 }
 
 export type OfferState = {
   offer?: Offer | null;
   nearByOffers: CardOffer[];
-  comments: Reviews;
   isLoadingOffer: boolean;
   isOfferFound: boolean;
+}
+
+export type CommentsState = {
+  comments: Reviews;
+  isSendingComment: boolean;
+  isSendingSuccess?: boolean;
 }
 
 export type UserProcess = {

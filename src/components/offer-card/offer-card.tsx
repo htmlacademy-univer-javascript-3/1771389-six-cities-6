@@ -1,17 +1,20 @@
 import { generatePath, Link } from 'react-router-dom';
-import { CardOffer } from '../../models/offers';
+import { CardOffer } from '../../types/offers';
 import { GetPersentsFromRating } from '../rating/rating';
-import { AppRoute } from '../../const';
-import { CardType, getCardClassName, getImageWrapperClassName } from '../../models/card-types';
+import { AppRoute, BookmarkPrefix } from '../../const';
+import { CardType, getCardClassName, getImageSizes, getImageWrapperClassName } from '../../types/card-types';
+import { Bookmark } from '../bookmark/bookmark';
 
 type OfferCardProps = {
   offer: CardOffer;
   onMouseOver: () => void;
   onMouseLeave: () => void;
+  onBookmarkClick: (offerId: string) => void;
   cardType: CardType;
 }
 
-export function OfferCard({offer, onMouseOver, onMouseLeave, cardType}: OfferCardProps): JSX.Element{
+export function OfferCard({offer, onMouseOver, onMouseLeave, onBookmarkClick, cardType}: OfferCardProps): JSX.Element{
+  const {width, height} = getImageSizes(cardType);
   return(
     <article className={getCardClassName(cardType)} onMouseEnter={onMouseOver} onMouseLeave={onMouseLeave}>
       {
@@ -22,7 +25,7 @@ export function OfferCard({offer, onMouseOver, onMouseLeave, cardType}: OfferCar
       }
       <div className={getImageWrapperClassName(cardType)}>
         <Link to={generatePath(AppRoute.Offer, { id: String(offer.id) })}>
-          <img className="place-card__image" src={ offer.previewImage} width="260" height="200" alt="Place image"/>
+          <img className="place-card__image" src={ offer.previewImage} width={width} height={height} alt="Place image"/>
         </Link>
       </div>
       <div className="place-card__info">
@@ -31,12 +34,9 @@ export function OfferCard({offer, onMouseOver, onMouseLeave, cardType}: OfferCar
             <b className="place-card__price-value">&euro;{offer.price}</b>
             <span className="place-card__price-text">&#47;&nbsp;night</span>
           </div>
-          <button className="place-card__bookmark-button button" type="button">
-            <svg className="place-card__bookmark-icon" width="18" height="19">
-              <use xlinkHref="#icon-bookmark"></use>
-            </svg>
-            <span className="visually-hidden">To bookmarks</span>
-          </button>
+          <Bookmark offerId={offer.id} isActive={offer.isFavorite}
+            width={18} height={19} bookmarkType={BookmarkPrefix.Card} onBookmarkClick={onBookmarkClick}
+          />
         </div>
         <div className="place-card__rating rating">
           <div className="place-card__stars rating__stars">

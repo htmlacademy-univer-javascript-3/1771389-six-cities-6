@@ -1,16 +1,17 @@
-import { CardType, getCardListClassName } from '../../models/card-types';
-import { CardOffer } from '../../models/offers';
+import { CardType, getCardListClassName } from '../../types/card-types';
+import { CardOffer } from '../../types/offers';
 import { OfferCard } from '../offer-card/offer-card';
 
 
 type OffersProps = {
   offers: CardOffer[];
   setActiveOfferFunc: (offerId: string) => void;
+  onBookmarkClick: (offerId: string) => void;
   cardType: CardType;
 }
 
 
-export function OfferList({offers, setActiveOfferFunc, cardType} : OffersProps): JSX.Element {
+export function OfferList({offers, setActiveOfferFunc, onBookmarkClick, cardType} : OffersProps): JSX.Element {
   return(
     <div className={getCardListClassName(cardType)}>
       {
@@ -20,6 +21,7 @@ export function OfferList({offers, setActiveOfferFunc, cardType} : OffersProps):
             onMouseOver={() => setActiveOfferFunc(offer.id)}
             onMouseLeave={() => setActiveOfferFunc('')}
             cardType={cardType}
+            onBookmarkClick={onBookmarkClick}
             key={offer.id}
           />
         ))

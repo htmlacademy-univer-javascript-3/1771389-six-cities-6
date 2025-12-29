@@ -1,13 +1,17 @@
 import { Navigate, useParams } from 'react-router-dom';
-import { MainOffer } from './main-offer';
+import { MainOffer } from '../../components/main-offer/main-offer';
 import { Header } from '../../components/header/header';
 import { OfferList } from '../../components/offers-list/offer-list';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { fetchCommentsAction, fetchNearByOffersAction, fetchOfferAction } from '../../store/api-actions';
-import { getComments, getIfOfferFound, getIsLoadingOffer, getOffer, getOffersNearBy } from '../../store/offer-process/selectors';
+import { getIfOfferFound, getIsLoadingOffer, getOffer, getOffersNearBy } from '../../store/offer-process/selectors';
 import { useEffect } from 'react';
 import { LoadingScreen } from '../loading/loading';
-import { CardType } from '../../models/card-types';
+import { CardType } from '../../types/card-types';
+import { switchFavoriteStatusInNearByOffer } from '../../store/offer-process/offer-process';
+import { switchFavoriteStatusInOffers } from '../../store/offers-process/offers-process';
+import { AppRoute } from '../../const';
+import { getComments } from '../../store/comments-process/selectors';
 
 function OfferPage() : JSX.Element {
 
@@ -28,30 +32,36 @@ function OfferPage() : JSX.Element {
 
   }, [dispatch, id]);
 
+
   if (isOfferLoading){
     return <LoadingScreen />;
   }
 
   if (!isOfferFound){
-    return <Navigate to="/*" replace/>;
+    return <Navigate to={AppRoute.NotFound} replace/>;
   }
 
-  return(
-    <body>
-      <div className="page">
-        <Header/>
+  const handleBookmarkClick = (nearByOfferId: string) => {
+    dispatch(switchFavoriteStatusInNearByOffer(nearByOfferId));
+    dispatch(switchFavoriteStatusInOffers(nearByOfferId));
+  };
 
-        <main className="page__main page__main--offer">
-          <MainOffer offersNearBy={offersNearby} mainOffer={mainOffer!} comments={comments}/>
-          <div className="container">
-            <section className="near-places places">
-              <h2 className="near-places__title">Other places in the neighbourhood</h2>
-              <OfferList offers={offersNearby} setActiveOfferFunc={() => {}} cardType={CardType.NearPlaces}/>
-            </section>
-          </div>
-        </main>
-      </div>
-    </body>
+  return(
+    <div className="page">
+      <Header/>
+
+      <main className="page__main page__main--offer">
+        <MainOffer offersNearBy={offersNearby} mainOffer={mainOffer!} comments={comments}/>
+        <div className="container">
+          <section className="near-places places">
+            <h2 className="near-places__title">Other places in the neighbourhood</h2>
+            <OfferList offers={offersNearby} setActiveOfferFunc={() => {}} cardType={CardType.NearPlaces}
+              onBookmarkClick={handleBookmarkClick}
+            />
+          </section>
+        </div>
+      </main>
+    </div>
   );
 }
 
